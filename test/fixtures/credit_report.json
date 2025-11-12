@@ -1,0 +1,15 @@
+{
+  "business_info": {
+    "business_name": "Joe's Pizza LLC",
+    "tax_id": "12-3456789",
+    "owner": {
+      "name": "Joseph Smith",
+      "ssn": "123-45-6789"
+    }
+  },
+  "credit_data": {
+    "business_score": 720,
+    "personal_score": 680,
+    "report_date": "2025-01-15"
+  }
+}
