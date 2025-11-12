@@ -1,0 +1,15 @@
+<credit_report>
+  <business_info>
+    <business_name>Joe's Pizza LLC</business_name>
+    <tax_id>12-3456789</tax_id>
+    <owner>
+      <name>Joseph Smith</name>
+      <ssn>123-45-6789</ssn>
+    </owner>
+  </business_info>
+  <credit_data>
+    <business_score>720</business_score>
+    <personal_score>680</personal_score>
+    <report_date>2025-01-15</report_date>
+  </credit_data>
+</credit_report>

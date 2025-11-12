@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 # gem "rails"
 gem 'rufo'
+gem 'nokogiri'
 
 group :test do
     gem 'minitest-reporters'
