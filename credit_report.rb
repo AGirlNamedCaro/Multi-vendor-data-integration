@@ -14,7 +14,9 @@ class CreditReport
   end
 
   def get_report
-    normalize_report
+    report = normalize_report
+    validate_fields(report)
+    report
   end
 
   private
@@ -51,26 +53,26 @@ class CreditReport
 
   def credit_score_360_adapter(parsed_data)
     {
-      "business_name": parsed_data["business_info"]["business_name"],
-      "tax_id": parsed_data["business_info"]["tax_id"],
-      "owner_name": parsed_data["business_info"]["owner"]["name"],
-      "owner_ssn": parsed_data["business_info"]["owner"]["ssn"],
-      "business_credit_score": parsed_data["credit_data"]["business_score"],
-      "personal_credit_score": parse_data["credit_data"]["personal_score"],
-      "report_date": parsed_data["credit_data"]["report_date"],
-      "data_source": @vendor,
+      business_name: parsed_data.dig("business_info", "business_name"),
+      tax_id: parsed_data.dig("business_info", "tax_id"),
+      owner_name: parsed_data.dig("business_info", "owner", "name"),
+      owner_ssn: parsed_data.dig("business_info", "owner", "ssn"),
+      business_credit_score: parsed_data.dig("credit_data", "business_score"),
+      personal_credit_score: parsed_data.dig("credit_data", "personal_score"),
+      report_date: parsed_data.dig("credit_data", "report_date"),
+      data_source: @vendor,
     }
   end
 
   def bizcreditplus_adapter(parsed_data)
     {
-      business_name: parsed_data.xpath("//business_info/business_name").text,
-      tax_id: parsed_data.xpath("//business_info/tax_id").text,
-      owner_name: parsed_data.xpath("//business_info/owner/name").text,
-      owner_ssn: parsed_data.xpath("//business_info/owner/ssn").text,
-      business_credit_score: parsed_data.xpath("//credit_data/business_score").text.to_i,
-      personal_credit_score: parsed_data.xpath("//credit_data/personal_score").text.to_i,
-      report_date: parsed_data.xpath("//credit_data/report_date").text,
+      business_name: text_or_nil(parsed_data.xpath("//business_info/business_name").text),
+      tax_id: text_or_nil(parsed_data.xpath("//business_info/tax_id").text),
+      owner_name: text_or_nil(parsed_data.xpath("//business_info/owner/name").text),
+      owner_ssn: text_or_nil(parsed_data.xpath("//business_info/owner/ssn").text),
+      business_credit_score: to_int(parsed_data.xpath("//credit_data/business_score").text),
+      personal_credit_score: to_int(parsed_data.xpath("//credit_data/personal_score").text),
+      report_date: text_or_nil(parsed_data.xpath("//credit_data/report_date").text),
       data_source: @vendor,
     }
   end
@@ -87,5 +89,35 @@ class CreditReport
       report_date: row["report_date"],
       data_source: @vendor,
     }
+  end
+
+  def validate_fields(report)
+    report = report.transform_keys(&:to_sym)  # normalize key types
+
+    required_fields = %i[
+      business_name
+      tax_id
+      owner_name
+      owner_ssn
+      business_credit_score
+      personal_credit_score
+      report_date
+      data_source
+    ]
+
+    missing_fields = required_fields.select { |field| report[field].nil? || report[field].to_s.strip.empty? }
+
+    unless missing_fields.empty?
+      raise KeyError, "Missing required fields: #{missing_fields.join(", ")}"
+    end
+  end
+
+  def text_or_nil(str)
+    str = str.to_s.strip
+    str.empty? ? nil : str
+  end
+
+  def to_int(str)
+    str.to_s.strip.empty? ? nil : str.to_i
   end
 end

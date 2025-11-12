@@ -42,4 +42,22 @@ class CreditReportTest < Minitest::Test
     assert_equal "2025-01-15", normalized_report[:report_date]
     assert_equal "enterprisecreditdata", normalized_report[:data_source]
   end
+
+  def test_incomplete_data_raises_error_json
+    data = '{"business_info": {"business_name": "Joe\'s Pizza LLC"}}'
+    assert_raises(KeyError) { CreditReport.new(data, "creditscore360").get_report }
+  end
+
+  def test_incomplete_data_raises_error_xml
+    data = '<report><business_info><business_name>Joe\'s Pizza LLC</business_name></business_info><credit_data><business_score></business_score><personal_score></personal_score><report_date></report_date></credit_data></report>'
+    assert_raises(KeyError) { CreditReport.new(data, "bizcreditplus").get_report }
+  end
+
+  def test_incomplete_data_raises_error_csv
+    data = <<~CSV
+      business_name,tax_id,owner_name,owner_ssn,business_score,personal_score,report_date
+      Joe's Pizza LLC,,,,,, 
+    CSV
+    assert_raises(KeyError) { CreditReport.new(data, "enterprisecreditdata").get_report }
+  end
 end
