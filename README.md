@@ -8,3 +8,7 @@ Receive financial data from 3 vendors in different formats. Build a system to:
 
 ### Technology
 Ruby 3.4.5
+
+### TODO
+- Put adaptors in their own classes
+- Create tests for new classes
